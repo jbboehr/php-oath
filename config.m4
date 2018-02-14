@@ -1,24 +1,25 @@
+
 PHP_ARG_ENABLE(oath, for OATH support,
-[	--enable-oath   Include OATH support])
+[  --enable-oath           Include OATH support])
 
 if test "$PHP_OATH" = "yes"; then
-  for i in $PHP_OATH_FILTER /usr/local /usr; do
-    test -f $i/include/liboath/oath.h && PHP_OATH_FILTER_DIR=$i && break
-  done
+    AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
 
-  if test -z "$PHP_OATH_FILTER_DIR"; then
-    AC_MSG_ERROR(oath.h not found. Please (re)install liboath.)
-  fi
+    AC_MSG_CHECKING([for oath-toolkit])
+    if test -x "$PKG_CONFIG" && $PKG_CONFIG --exists liboath; then
+        LIBOATH_CFLAGS=`$PKG_CONFIG liboath --cflags`
+        LIBOATH_LIBS=`$PKG_CONFIG liboath --libs`
+        LIBOATH_VERSION=`$PKG_CONFIG liboath --modversion`
+        AC_MSG_RESULT(version $LIBOATH_VERSION found using pkg-config)
+        PHP_EVAL_LIBLINE($LIBOATH_LIBS, OATH_SHARED_LIBADD)
+        PHP_EVAL_INCLINE($LIBOATH_CFLAGS)
+    else
+        PHP_ADD_LIBRARY(oath, OATH_SHARED_LIBADD)
+    fi
 
-  PHP_CHECK_LIBRARY(oath, oath_totp_generate, [], [
-    AC_MSG_ERROR(oath lib not found. Please (re)install liboath.)
-  ], [
-    -L$PHP_OATH_FILTER_DIR/lib -loath
-  ])
-
-  PHP_ADD_LIBRARY_WITH_PATH(oath, $PHP_OATH_FILTER_DIR/lib, OATH_SHARED_LIBADD)
-  PHP_ADD_INCLUDE($PHP_OATH_FILTER_DIR/include)
-  PHP_NEW_EXTENSION(oath, oath.c, $ext_shared)
-  PHP_SUBST(OATH_SHARED_LIBADD)
+    PHP_NEW_EXTENSION(oath, oath.c, $ext_shared)
+    PHP_SUBST(OATH_SHARED_LIBADD)
 fi
+
+# vim: tabstop=4:softtabstop=4:shiftwidth=4:noexpandtab
 
