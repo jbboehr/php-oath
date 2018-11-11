@@ -17,7 +17,7 @@ if test "$PHP_OATH" = "yes"; then
         PHP_ADD_LIBRARY(oath, OATH_SHARED_LIBADD)
     fi
 
-    PHP_NEW_EXTENSION(oath, oath.c, $ext_shared)
+    PHP_NEW_EXTENSION(oath, php_oath.c, $ext_shared)
     PHP_SUBST(OATH_SHARED_LIBADD)
 fi
 
