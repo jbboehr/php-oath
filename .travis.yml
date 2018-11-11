@@ -1,25 +1,69 @@
+sudo: false
+
 language: php
 
 php:
-  - 5.4
-  - 5.5
-  - 5.6
-  - 7.0
-  - 7.1
-  - 7.2
+  - '5.6'
+  - '7.0'
+  - '7.1'
+  - '7.2'
+  - '7.3'
+  - 'master'
 
-sudo: false
+matrix:
+  fast_finish: true
+  allow_failures:
+    - php: 'master'
+  include:
+    - language: nix
+      php:
+      before_install: nix-env -iA cachix -f https://github.com/NixOS/nixpkgs/tarball/889c72032f8595fcd7542c6032c208f6b8033db6
+      install:
+      before_script:
+      script: nix-build --argstr phpOathVersion $TRAVIS_BRANCH --arg php "(import <nixpkgs> {}).$NIX_PHP_ATTR" | tee result.txt
+      after_success: cat result.txt | cachix push jbboehr-ci
+      after_failure:
+      env:
+        - NIX_PHP_ATTR=php71
+    - language: nix
+      php:
+      before_install: nix-env -iA cachix -f https://github.com/NixOS/nixpkgs/tarball/889c72032f8595fcd7542c6032c208f6b8033db6
+      install:
+      before_script:
+      script: nix-build --argstr phpOathVersion $TRAVIS_BRANCH --arg php "(import <nixpkgs> {}).$NIX_PHP_ATTR" | tee result.txt
+      after_success: cat result.txt | cachix push jbboehr-ci
+      after_failure:
+      env:
+        - NIX_PHP_ATTR=php72
 
 addons:
   apt:
     packages:
+      - lcov
       - liboath0
       - liboath-dev
 
+env:
+  global:
+    - secure: "s1Ib+0Q9+MIu/F/YX/MFm+nm6fXMh4N2vPzloh8vsV4e49QKHbHjbuvAXJVjQBB8SjJkeWWENG5RWIn6khreA5p+oC/iuY3UL3KNCIDOdQtxsbkoZr7zwZ258uXkXRxMOE61A6R0VnAq2SoCCUUTevRJV8S48cWdG3t9RkCS83dLxWwNoALKmE9rmMUy9W7Q7qea/QIIyb1DyquZ8jmZD0jDu6EkE/chF8F5AhAo+1wjeTcoC+fsXJldpzz73gGafUI+db16VxfyAKJC9SQr85ZWBJWcpPb8QeqJH/TnWpSIDmtPdDXRTe+G7hlofnI0hUlLChq6HOS05drzP8iaWgnY/iqkJE4bjMUhAdNc8Dj0ZVaCB0wkUrzVVdCMBPILQUNRlTaQeLxbkmy9ynJJfgdKDSfJrfkbXoV2ShrwftqRiEjJBBLNvW+bVynAbz8figTvg3fAZWYJHmcvCZqKenfGE9MhwWxiimC8jaIEAnxIuS20dYU7Ha+ovwyQEQbcxoVZ2lbpi56IJk26LupeZQki7n2bfpIpnMBwMQTPlQvQRA2OqFesu6EYRVkUM7LiJMSruiQENshZpc76jg7Biq3RJVbQ33d+k5iv9gpTL7TiXGshRrCSQqU3u63x17vunYOSXKmPAzwUDZMDij7JEu/yb17FWwDVc5HP7K1YVxo="
+
+branches:
+  only:
+    - master
+    - develop
+    - travis
+    - ci
+
+before_install:
+  - travis_retry gem install coveralls-lcov
 install:
   - phpize
-  - ./configure --enable-oath
-  - make
+  - ./configure CFLAGS="-fprofile-arcs -ftest-coverage $CFLAGS" LDFLAGS="--coverage"
+  - make clean all
+
+before_script:
+  - lcov --directory . --zerocounters
+  - lcov --directory . --capture --compat-libtool --initial --output-file coverage.info
 
 script:
   - export NO_INTERACTION=1
@@ -27,6 +71,12 @@ script:
   - export TEST_PHP_EXECUTABLE=`which php`
   - php run-tests.php -d extension=oath.so -d extension_dir=modules -n ./tests/*.phpt
 
+after_success:
+  - lcov --no-checksum --directory . --capture --compat-libtool --output-file coverage.info
+  - lcov --remove coverage.info "/usr*" --remove coverage.info "*/.phpenv/*" --remove coverage.info "/home/travis/build/include/*" --compat-libtool --output-file coverage.info
+  - coveralls-lcov coverage.info
+
 after_failure:
-  - for i in `ls tests/*.out 2>/dev/null`; do echo "-- START ${i}"; cat $i; echo "-- END"; done
+  - for i in `find tests -name "*.out" 2>/dev/null`; do echo "-- START ${i}"; cat $i; echo "-- END"; done
+  - for i in `find tests -name "*.mem" 2>/dev/null`; do echo "-- START ${i}"; cat $i; echo "-- END"; done
 
