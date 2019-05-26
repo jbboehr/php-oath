@@ -25,14 +25,6 @@
 #define OATHG(v) (oath_globals.v)
 #endif
 
-#ifdef ZEND_ENGINE_3
-typedef size_t strsize_t;
-#define _RETURN_STRINGL RETURN_STRINGL
-#else
-typedef int strsize_t;
-#define _RETURN_STRINGL(s, l) RETURN_STRINGL(s, l, 1)
-#endif
-
 PHPAPI int php_totp_generate(const char *key, size_t key_length, unsigned digits, unsigned time_step_size, char *otp);
 PHPAPI int php_totp_validate(const char *key, size_t key_length, unsigned digits, unsigned time_step_size, size_t window, const char *otp);
 PHPAPI int php_hotp_generate(const char *key, size_t key_length, uint64_t moving_factor, size_t digits, char *otp);
