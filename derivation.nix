@@ -9,6 +9,7 @@ let
 in
 
 buildPecl rec {
+  pname = "oath";
   name = "oath-${version}";
   version = orDefault phpOathVersion "5bf7f88ab2644ae34e1983d698f2645d4d78308d";
   src = orDefault phpOathSrc (fetchurl {

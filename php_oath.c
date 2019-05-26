@@ -185,18 +185,16 @@ ZEND_GET_MODULE(oath)
 PHP_FUNCTION(google_authenticator_validate)
 {
     char *secret_key;
-    strsize_t secret_key_length;
+    size_t secret_key_length;
     char *user_input;
-    strsize_t user_input_length;
+    size_t user_input_length;
     char *output_buffer;
     int ret;
 
-    /**
-     * Parse parameters. Make the secret_key mandatory, and the length and time factor optional.
-     */
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &secret_key, &secret_key_length, &user_input, &user_input_length) == FAILURE) {
-        RETURN_NULL();
-    }
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_STRING(secret_key, secret_key_length)
+        Z_PARAM_STRING(user_input, user_input_length)
+    ZEND_PARSE_PARAMETERS_END();
 
     ret = php_totp_validate(secret_key, secret_key_length, 6, 30, OATHG(window), user_input);
 
@@ -221,21 +219,18 @@ PHP_FUNCTION(google_authenticator_validate)
 PHP_FUNCTION(google_authenticator_generate)
 {
     char *secret_key;
-    strsize_t secret_key_length;
+    size_t secret_key_length;
     char output_buffer[16] = {0};
     int ret;
 
-    /**
-     * Parse parameters.
-     */
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &secret_key, &secret_key_length) == FAILURE) {
-        RETURN_NULL();
-    }
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STRING(secret_key, secret_key_length)
+    ZEND_PARSE_PARAMETERS_END();
 
     ret = php_totp_generate(secret_key, secret_key_length, 6, 30, output_buffer);
 
     if (ret >= 0) {
-        _RETURN_STRINGL(output_buffer, 6);
+        RETURN_STRINGL(output_buffer, 6);
     } else {
         zend_error(
             E_WARNING,
@@ -253,20 +248,21 @@ PHP_FUNCTION(google_authenticator_generate)
 PHP_FUNCTION(totp_validate)
 {
     char *secret_key;
-    strsize_t secret_key_length;
+    size_t secret_key_length;
     char *user_input;
-    strsize_t user_input_length;
-    ulong length = 0;
-    ulong time_step_size = 0;
+    size_t user_input_length;
+    long length = 0;
+    long time_step_size = 0;
     char *output_buffer;
     int ret;
 
-    /**
-     * Parse parameters. Make the secret_key mandatory, and the length and time factor optional.
-     */
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &secret_key, &secret_key_length, &user_input, &user_input_length, &length, &time_step_size) == FAILURE) {
-        RETURN_NULL();
-    }
+    ZEND_PARSE_PARAMETERS_START(2, 4)
+        Z_PARAM_STRING(secret_key, secret_key_length)
+        Z_PARAM_STRING(user_input, user_input_length)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_LONG(length)
+        Z_PARAM_LONG(time_step_size)
+    ZEND_PARSE_PARAMETERS_END();
 
     /**
      * Set default value of optional parameter 'length' to 6.
@@ -330,18 +326,18 @@ PHPAPI int php_totp_validate(const char *key, size_t key_length, unsigned length
 PHP_FUNCTION(totp_generate)
 {
     char *secret_key;
-    strsize_t secret_key_length;
-    ulong length;
-    ulong time_step_size;
+    size_t secret_key_length;
+    long length;
+    long time_step_size;
     char output_buffer[16] = {0};
     int ret;
 
-    /**
-     * Parse parameters. Make the secret_key mandatory, and the length and time factor optional.
-     */
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &secret_key, &secret_key_length, &length, &time_step_size) == FAILURE) {
-        RETURN_NULL();
-    }
+    ZEND_PARSE_PARAMETERS_START(1, 3)
+        Z_PARAM_STRING(secret_key, secret_key_length)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_LONG(length)
+        Z_PARAM_LONG(time_step_size)
+    ZEND_PARSE_PARAMETERS_END();
 
     /**
      * Set default value of optional parameter 'length' to 6.
@@ -360,7 +356,7 @@ PHP_FUNCTION(totp_generate)
     ret = php_totp_generate(secret_key, secret_key_length, length, time_step_size, output_buffer);
 
     if (ret >= 0) {
-        _RETURN_STRINGL(output_buffer, length);
+        RETURN_STRINGL(output_buffer, length);
     } else {
         zend_error(
             E_WARNING,
@@ -413,19 +409,18 @@ PHPAPI int php_totp_generate(const char *key, size_t key_length, unsigned digits
 PHP_FUNCTION(hotp_validate)
 {
     char *secret_key;
-    strsize_t secret_key_length;
+    size_t secret_key_length;
     char *user_input;
-    strsize_t user_input_length;
-    ulong moving_factor;
+    size_t user_input_length;
+    long moving_factor;
     char *output_buffer;
     int ret;
 
-    /**
-     * Parse parameters. Make the secret_key mandatory, and the length and time factor optional.
-     */
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl", &secret_key, &secret_key_length, &user_input, &user_input_length, &moving_factor) == FAILURE) {
-        RETURN_NULL();
-    }
+    ZEND_PARSE_PARAMETERS_START(3, 3)
+        Z_PARAM_STRING(secret_key, secret_key_length)
+        Z_PARAM_STRING(user_input, user_input_length)
+        Z_PARAM_LONG(moving_factor)
+    ZEND_PARSE_PARAMETERS_END();
 
     ret = php_hotp_validate(secret_key, secret_key_length, moving_factor, OATHG(window), user_input);
 
@@ -471,18 +466,18 @@ PHPAPI int php_hotp_validate(const char *key, size_t key_length, uint64_t moving
 PHP_FUNCTION(hotp_generate)
 {
     char *secret_key;
-    strsize_t secret_key_length;
-    ulong moving_factor;
-    ulong length;
+    size_t secret_key_length;
+    long moving_factor = 0;
+    long length = 0;
     char output_buffer[16] = {0};
     int ret;
 
-    /**
-     * Parse parameters. Make the secret_key mandatory, and the length and time factor optional.
-     */
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|l", &secret_key, &secret_key_length, &moving_factor, &length) == FAILURE) {
-        RETURN_NULL();
-    }
+    ZEND_PARSE_PARAMETERS_START(2, 3)
+        Z_PARAM_STRING(secret_key, secret_key_length)
+        Z_PARAM_LONG(moving_factor)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_LONG(length)
+    ZEND_PARSE_PARAMETERS_END();
 
     /**
      * Set default value of optional parameter 'length' to 6.
@@ -494,7 +489,7 @@ PHP_FUNCTION(hotp_generate)
     ret = php_hotp_generate(secret_key, secret_key_length, moving_factor, length, output_buffer);
 
     if (ret >= 0) {
-        _RETURN_STRINGL(output_buffer, length);
+        RETURN_STRINGL(output_buffer, length);
     } else {
         zend_error(
             E_WARNING,
