@@ -1,11 +1,12 @@
 { php, stdenv, autoreconfHook, fetchurl, oathToolkit, pkgconfig,
+  buildPecl ? import <nixpkgs/pkgs/build-support/build-pecl.nix> {
+    # re2c is required for nixpkgs master, must not be specified for <= 19.03
+    inherit php stdenv autoreconfHook fetchurl;
+  },
   phpOathVersion ? null, phpOathSrc ? null, phpOathSha256 ? null }:
 
 let
   orDefault = x: y: (if (!isNull x) then x else y);
-  buildPecl = import <nixpkgs/pkgs/build-support/build-pecl.nix> {
-    inherit php stdenv autoreconfHook fetchurl;
-  };
 in
 
 buildPecl rec {
@@ -23,6 +24,6 @@ buildPecl rec {
 
   doCheck = true;
   checkTarget = "test";
-  checkFlagsArray = ["REPORT_EXIT_STATUS=1" "NO_INTERACTION=1" "TEST_PHP_DETAILED=1"];
+  checkFlags = ["REPORT_EXIT_STATUS=1" "NO_INTERACTION=1"];
 }
 

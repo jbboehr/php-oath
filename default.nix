@@ -1,6 +1,9 @@
 {
   pkgs ? import <nixpkgs> {},
   php ? pkgs.php,
+  buildPecl ? pkgs.callPackage <nixpkgs/pkgs/build-support/build-pecl.nix> {
+    inherit php;
+  },
 
   phpOathVersion ? null,
   phpOathSrc ? ./.,
@@ -8,6 +11,6 @@
 }:
 
 pkgs.callPackage ./derivation.nix {
-  inherit php phpOathVersion phpOathSrc phpOathSha256;
+  inherit php buildPecl phpOathVersion phpOathSrc phpOathSha256;
 }
 
