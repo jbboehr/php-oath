@@ -3,6 +3,13 @@ PHP_ARG_ENABLE(oath, for OATH support,
 [  --enable-oath           Include OATH support])
 
 if test "$PHP_OATH" = "yes"; then
+    AH_BOTTOM([
+#ifdef __clang__
+#include "main/php_config.h"
+#/**/undef/**/ HAVE_ASM_GOTO
+#endif
+    ])
+
     AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
 
     AC_MSG_CHECKING([for oath-toolkit])

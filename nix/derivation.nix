@@ -1,9 +1,13 @@
-{ php, stdenv, autoreconfHook, fetchurl, oathToolkit, pkgconfig,
+{
+  php, stdenv, autoreconfHook, fetchurl, oathToolkit, pkgconfig,
   buildPecl ? import <nixpkgs/pkgs/build-support/build-pecl.nix> {
     # re2c is required for nixpkgs master, must not be specified for <= 19.03
     inherit php stdenv autoreconfHook fetchurl;
   },
-  phpOathVersion ? null, phpOathSrc ? null, phpOathSha256 ? null }:
+  phpOathVersion ? null,
+  phpOathSrc ? null,
+  phpOathSha256 ? null
+}:
 
 let
   orDefault = x: y: (if (!isNull x) then x else y);
