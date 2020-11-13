@@ -16,7 +16,7 @@
   phpOathVersion ? null,
   phpOathSha256 ? null,
   phpOathSrc ? pkgs.lib.cleanSourceWith {
-    filter = (path: type: (builtins.all (x: x != baseNameOf path) [".idea" ".git" "ci.nix" ".travis.sh" ".travis.yml" ".ci" "nix" "default.nix"]));
+    filter = (path: type: (builtins.all (x: x != baseNameOf path) [".idea" ".git" "ci.nix" ".travis.sh" "nix" "default.nix" ".github"]));
     src = gitignoreSource ./.;
   }
 }:

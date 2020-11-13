@@ -45,8 +45,7 @@
 result*/
 
 # ci and docker
-.github
-.travis.*
+**/.github/*
 **/*.nix
 **/*Dockerfile
 **/.dockerignore

@@ -1,6 +1,9 @@
 OATH-PHP
 =========
 
+[![GitHub Linux Build Status](https://github.com/jbboehr/php-oath/workflows/linux/badge.svg)](https://github.com/jbboehr/php-oath/actions?query=workflow%3Alinux)
+[![GitHub Docker Build Status](https://github.com/jbboehr/php-oath/workflows/docker/badge.svg)](https://github.com/jbboehr/php-oath/actions?query=workflow%3Adocker)
+
 OATH-PHP is a PHP extension for handling OATH related technology. OATH-php provides methods  for two types of one time passwords (OTPs): event based (HOTP) or time based (TOTP). As a bonus a wrapper for the Google Authenticator is provided as well.
 
 The library is tested against the [Google Authenticator Application](http://support.google.com/accounts/bin/answer.py?hl=en&answer=1066447), available for many smartphone platforms, and the C100/C200 OTP Hardware Tokens available at [Gooze.eu](http://www.gooze.eu/catalog/otp-tokens-oath-0).
